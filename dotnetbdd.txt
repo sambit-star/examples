@@ -1,0 +1,844 @@
+Automatically generating test cases for a .NET project involves several steps and can be done using various tools and libraries. Here's a comprehensive approach to achieve this using popular tools like SpecFlow for BDD and other .NET testing frameworks.
+
+### Tools and Libraries
+
+1. **SpecFlow**: A popular BDD framework for .NET that integrates with Gherkin syntax.
+2. **NUnit/xUnit/MSTest**: Common testing frameworks for writing and running tests in .NET.
+3. **NSubstitute/Moq**: Libraries for creating mock objects in tests.
+
+### Steps to Automatically Generate Test Cases
+
+1. **Install SpecFlow and Testing Frameworks**
+2. **Define Feature Files**
+3. **Generate Step Definitions**
+4. **Write Step Definitions**
+5. **Run Tests**
+
+#### 1. Install SpecFlow and Testing Frameworks
+
+First, you need to install SpecFlow and your preferred testing framework (NUnit, xUnit, or MSTest) in your .NET project. This can be done using NuGet Package Manager.
+
+**Install SpecFlow with NUnit:**
+
+```sh
+dotnet add package SpecFlow.NUnit
+dotnet add package SpecFlow.Tools.MsBuild.Generation
+dotnet add package NUnit
+dotnet add package NUnit3TestAdapter
+```
+
+For xUnit or MSTest, you can replace `NUnit` with `xUnit` or `MSTest`.
+
+#### 2. Define Feature Files
+
+Create feature files using Gherkin syntax. These files describe the behavior of your application in plain language.
+
+**Example: `Login.feature`**
+
+```gherkin
+Feature: Login functionality
+
+  Scenario: Successful login with valid credentials
+    Given the user is on the login page
+    When the user enters valid credentials
+    Then the user should be redirected to the dashboard
+
+  Scenario: Unsuccessful login with invalid credentials
+    Given the user is on the login page
+    When the user enters invalid credentials
+    Then an error message should be displayed
+```
+
+Place these feature files in a directory named `Features`.
+
+#### 3. Generate Step Definitions
+
+After defining the feature files, you need to generate step definitions. SpecFlow provides a tool to generate these definitions automatically.
+
+Run the SpecFlow step definition generation tool:
+
+```sh
+dotnet build
+```
+
+This command generates step definition stubs in `.cs` files corresponding to your feature files.
+
+#### 4. Write Step Definitions
+
+Implement the generated step definitions. This is where you write the code that will execute when each step in your feature file is run.
+
+**Example: `LoginSteps.cs`**
+
+```csharp
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class LoginSteps
+{
+    [Given(@"the user is on the login page")]
+    public void GivenTheUserIsOnTheLoginPage()
+    {
+        // Navigate to the login page
+    }
+
+    [When(@"the user enters valid credentials")]
+    public void WhenTheUserEntersValidCredentials()
+    {
+        // Enter valid credentials
+    }
+
+    [Then(@"the user should be redirected to the dashboard")]
+    public void ThenTheUserShouldBeRedirectedToTheDashboard()
+    {
+        // Assert the user is redirected to the dashboard
+    }
+
+    [When(@"the user enters invalid credentials")]
+    public void WhenTheUserEntersInvalidCredentials()
+    {
+        // Enter invalid credentials
+    }
+
+    [Then(@"an error message should be displayed")]
+    public void ThenAnErrorMessageShouldBeDisplayed()
+    {
+        // Assert an error message is displayed
+    }
+}
+```
+
+#### 5. Run Tests
+
+Run the tests using your preferred testing framework. For NUnit, you can use the following command:
+
+```sh
+dotnet test
+```
+
+This command runs all tests in the project, including the BDD tests defined with SpecFlow.
+
+### Additional Tips
+
+- **CI/CD Integration**: Integrate your tests into a CI/CD pipeline using tools like Azure DevOps, Jenkins, or GitHub Actions.
+- **Mocking Dependencies**: Use mocking frameworks like Moq or NSubstitute to mock dependencies and isolate the code under test.
+- **Test Data Management**: Manage test data effectively using data-driven tests or external data sources.
+
+### Conclusion
+
+By following these steps, you can automatically generate and run BDD test cases for a .NET project using SpecFlow. This approach ensures that your tests are readable, maintainable, and closely aligned with the behavior described in your user stories.
+
+
+
+
+
+
+
+
+
+
+Yes, you can automate the process of implementing step definitions to some extent by using templates and scripts to generate boilerplate code. While it may not cover all edge cases, it can significantly reduce the manual effort involved. Here's an approach to automate step definitions using a combination of SpecFlow and custom scripts:
+
+### Automated Step Definitions with SpecFlow and Templates
+
+1. **Create Feature Files**
+2. **Generate Step Definition Stubs**
+3. **Create Templates for Step Definitions**
+4. **Use a Script to Automate Step Definitions**
+5. **Run Tests**
+
+#### 1. Create Feature Files
+
+Create your Gherkin feature files as usual.
+
+**Example: `Login.feature`**
+
+```gherkin
+Feature: Login functionality
+
+  Scenario: Successful login with valid credentials
+    Given the user is on the login page
+    When the user enters valid credentials
+    Then the user should be redirected to the dashboard
+
+  Scenario: Unsuccessful login with invalid credentials
+    Given the user is on the login page
+    When the user enters invalid credentials
+    Then an error message should be displayed
+```
+
+#### 2. Generate Step Definition Stubs
+
+Run SpecFlow to generate the initial step definition stubs.
+
+```sh
+dotnet build
+```
+
+This command generates stubs for the steps defined in your feature files.
+
+#### 3. Create Templates for Step Definitions
+
+Create a template for the step definitions. This template will include placeholders for the step text and method names.
+
+**Example: `StepDefinitionTemplate.txt`**
+
+```csharp
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class {ClassName}
+{
+    [Given(@"{GivenStep}")]
+    public void Given{GivenMethod}()
+    {
+        // TODO: Implement Given step
+    }
+
+    [When(@"{WhenStep}")]
+    public void When{WhenMethod}()
+    {
+        // TODO: Implement When step
+    }
+
+    [Then(@"{ThenStep}")]
+    public void Then{ThenMethod}()
+    {
+        // TODO: Implement Then step
+    }
+}
+```
+
+#### 4. Use a Script to Automate Step Definitions
+
+Create a script to parse the feature files and generate step definitions using the template. This example uses Python, but you can use any scripting language you are comfortable with.
+
+**Example: `generate_step_definitions.py`**
+
+```python
+import os
+import re
+
+feature_dir = 'Features'
+output_dir = 'StepDefinitions'
+template_file = 'StepDefinitionTemplate.txt'
+
+def camel_case(s):
+    return ''.join(x for x in s.title() if x.isalnum())
+
+def generate_step_definition(feature_file, template):
+    class_name = os.path.splitext(os.path.basename(feature_file))[0] + 'Steps'
+    with open(feature_file, 'r') as f:
+        content = f.read()
+    given_steps = re.findall(r'Given (.+)', content)
+    when_steps = re.findall(r'When (.+)', content)
+    then_steps = re.findall(r'Then (.+)', content)
+    
+    step_definitions = template.replace('{ClassName}', class_name)
+    step_definitions = step_definitions.replace('{GivenStep}', given_steps[0] if given_steps else '')
+    step_definitions = step_definitions.replace('{WhenStep}', when_steps[0] if when_steps else '')
+    step_definitions = step_definitions.replace('{ThenStep}', then_steps[0] if then_steps else '')
+    
+    step_definitions = step_definitions.replace('{GivenMethod}', camel_case(given_steps[0]) if given_steps else '')
+    step_definitions = step_definitions.replace('{WhenMethod}', camel_case(when_steps[0]) if when_steps else '')
+    step_definitions = step_definitions.replace('{ThenMethod}', camel_case(then_steps[0]) if then_steps else '')
+    
+    output_file = os.path.join(output_dir, class_name + '.cs')
+    with open(output_file, 'w') as f:
+        f.write(step_definitions)
+
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+with open(template_file, 'r') as f:
+    template = f.read()
+
+for feature_file in os.listdir(feature_dir):
+    if feature_file.endswith('.feature'):
+        generate_step_definition(os.path.join(feature_dir, feature_file), template)
+```
+
+This script will parse the feature files, extract the step text, and generate corresponding step definition files using the template.
+
+#### 5. Run Tests
+
+After generating the step definitions, you can run your tests as usual:
+
+```sh
+dotnet test
+```
+
+### Conclusion
+
+By creating a template and a script to generate step definitions, you can automate much of the process of writing step definitions in SpecFlow. This approach can save significant time and effort, especially in large projects with many feature files. While the generated code will still need some customization and implementation details, the automation will handle the repetitive parts of the task.
+
+
+
+
+
+Certainly! Below is an example of a real-life step definition file for a SpecFlow project. This example is based on a common scenario: user login functionality.
+
+### Example Feature File: `Login.feature`
+
+```gherkin
+Feature: Login functionality
+
+  Scenario: Successful login with valid credentials
+    Given the user is on the login page
+    When the user enters valid credentials
+    And the user clicks the login button
+    Then the user should be redirected to the dashboard
+
+  Scenario: Unsuccessful login with invalid credentials
+    Given the user is on the login page
+    When the user enters invalid credentials
+    And the user clicks the login button
+    Then an error message should be displayed
+```
+
+### Step Definition File: `LoginSteps.cs`
+
+```csharp
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+namespace YourProjectNamespace.StepDefinitions
+{
+    [Binding]
+    public class LoginSteps
+    {
+        private readonly LoginPage _loginPage;
+        private readonly DashboardPage _dashboardPage;
+
+        public LoginSteps(LoginPage loginPage, DashboardPage dashboardPage)
+        {
+            _loginPage = loginPage;
+            _dashboardPage = dashboardPage;
+        }
+
+        [Given(@"the user is on the login page")]
+        public void GivenTheUserIsOnTheLoginPage()
+        {
+            _loginPage.NavigateTo();
+        }
+
+        [When(@"the user enters valid credentials")]
+        public void WhenTheUserEntersValidCredentials()
+        {
+            _loginPage.EnterUsername("validUser");
+            _loginPage.EnterPassword("validPassword");
+        }
+
+        [When(@"the user enters invalid credentials")]
+        public void WhenTheUserEntersInvalidCredentials()
+        {
+            _loginPage.EnterUsername("invalidUser");
+            _loginPage.EnterPassword("invalidPassword");
+        }
+
+        [When(@"the user clicks the login button")]
+        public void WhenTheUserClicksTheLoginButton()
+        {
+            _loginPage.ClickLoginButton();
+        }
+
+        [Then(@"the user should be redirected to the dashboard")]
+        public void ThenTheUserShouldBeRedirectedToTheDashboard()
+        {
+            Assert.IsTrue(_dashboardPage.IsDisplayed(), "Dashboard page is not displayed.");
+        }
+
+        [Then(@"an error message should be displayed")]
+        public void ThenAnErrorMessageShouldBeDisplayed()
+        {
+            Assert.IsTrue(_loginPage.IsErrorMessageDisplayed(), "Error message is not displayed.");
+        }
+    }
+}
+```
+
+### Explanation
+
+1. **Dependencies Injection**:
+   - The constructor of `LoginSteps` injects `LoginPage` and `DashboardPage` objects. This is a common practice in SpecFlow to leverage dependency injection for page objects or services.
+
+2. **Page Object Pattern**:
+   - `LoginPage` and `DashboardPage` represent page objects. These classes encapsulate the interactions with the web pages, such as entering credentials, clicking buttons, and checking the visibility of elements.
+
+3. **Step Definitions**:
+   - `GivenTheUserIsOnTheLoginPage`: Navigates to the login page.
+   - `WhenTheUserEntersValidCredentials`: Enters valid username and password.
+   - `WhenTheUserEntersInvalidCredentials`: Enters invalid username and password.
+   - `WhenTheUserClicksTheLoginButton`: Clicks the login button.
+   - `ThenTheUserShouldBeRedirectedToTheDashboard`: Asserts that the user is redirected to the dashboard.
+   - `ThenAnErrorMessageShouldBeDisplayed`: Asserts that an error message is displayed.
+
+### Page Object Example: `LoginPage.cs`
+
+```csharp
+using OpenQA.Selenium;
+
+namespace YourProjectNamespace.Pages
+{
+    public class LoginPage
+    {
+        private readonly IWebDriver _driver;
+        
+        public LoginPage(IWebDriver driver)
+        {
+            _driver = driver;
+        }
+
+        public void NavigateTo()
+        {
+            _driver.Navigate().GoToUrl("http://yourapp.com/login");
+        }
+
+        public void EnterUsername(string username)
+        {
+            var usernameField = _driver.FindElement(By.Id("username"));
+            usernameField.Clear();
+            usernameField.SendKeys(username);
+        }
+
+        public void EnterPassword(string password)
+        {
+            var passwordField = _driver.FindElement(By.Id("password"));
+            passwordField.Clear();
+            passwordField.SendKeys(password);
+        }
+
+        public void ClickLoginButton()
+        {
+            var loginButton = _driver.FindElement(By.Id("loginButton"));
+            loginButton.Click();
+        }
+
+        public bool IsErrorMessageDisplayed()
+        {
+            try
+            {
+                return _driver.FindElement(By.Id("errorMessage")).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+        }
+    }
+}
+```
+
+### Page Object Example: `DashboardPage.cs`
+
+```csharp
+using OpenQA.Selenium;
+
+namespace YourProjectNamespace.Pages
+{
+    public class DashboardPage
+    {
+        private readonly IWebDriver _driver;
+        
+        public DashboardPage(IWebDriver driver)
+        {
+            _driver = driver;
+        }
+
+        public bool IsDisplayed()
+        {
+            try
+            {
+                return _driver.FindElement(By.Id("dashboard")).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+        }
+    }
+}
+```
+
+### Explanation of Page Objects
+
+- **LoginPage**:
+  - Contains methods to interact with the login page (e.g., enter username, enter password, click login button).
+  - Provides a method to check if an error message is displayed.
+
+- **DashboardPage**:
+  - Contains a method to check if the dashboard page is displayed.
+
+### Running Tests
+
+You can run your SpecFlow tests using a test runner that supports your chosen framework (e.g., NUnit, xUnit, MSTest).
+
+```sh
+dotnet test
+```
+
+This command will execute all the tests in your project, including the SpecFlow scenarios defined in your feature files.
+
+### Conclusion
+
+This example demonstrates how to create and implement step definitions in a SpecFlow project for .NET. By using page objects, dependency injection, and well-structured step definitions, you can create maintainable and readable BDD test cases. This approach helps in separating concerns and making your test automation code more modular and reusable.
+
+
+
+
+
+
+Using GitHub Copilot programmatically to automate test case generation with SpecFlow involves several steps. GitHub Copilot primarily works within IDEs like Visual Studio Code, where it provides AI-assisted code suggestions. However, to fully automate the process, you might consider integrating Copilot's capabilities into your development workflow. Here’s a conceptual approach:
+
+### Steps to Automate Test Case Generation with SpecFlow using GitHub Copilot
+
+1. **Set up GitHub Copilot**:
+    - Ensure GitHub Copilot is enabled and configured in your IDE (e.g., Visual Studio Code).
+
+2. **Create a Script to Generate Feature Files**:
+    - Write a script to generate SpecFlow feature files based on user stories or requirements.
+
+3. **Use GitHub Copilot for Step Definition Stubs**:
+    - Manually use Copilot to generate step definition stubs.
+    - Automate the integration of Copilot suggestions into your workflow.
+
+4. **Generate Step Definitions**:
+    - Automate the process of generating step definitions from the feature files.
+    - Use predefined templates to assist Copilot.
+
+5. **Integrate and Run Tests**:
+    - Use a CI/CD pipeline to integrate and run the generated tests.
+
+### Detailed Implementation
+
+#### 1. Set up GitHub Copilot
+
+Make sure GitHub Copilot is installed and configured in your IDE. You can follow the [official GitHub Copilot documentation](https://github.com/github/copilot-docs) for setup instructions.
+
+#### 2. Create a Script to Generate Feature Files
+
+Write a script that takes user stories or requirements as input and generates SpecFlow feature files.
+
+**Example: `generate_feature_files.py`**
+
+```python
+import os
+
+def generate_feature_file(feature_name, scenarios):
+    feature_content = f"Feature: {feature_name}\n\n"
+    for scenario in scenarios:
+        feature_content += f"  Scenario: {scenario['name']}\n"
+        for step in scenario['steps']:
+            feature_content += f"    {step}\n"
+        feature_content += "\n"
+    
+    with open(f"Features/{feature_name}.feature", "w") as file:
+        file.write(feature_content)
+
+# Example usage
+scenarios = [
+    {
+        "name": "Successful login with valid credentials",
+        "steps": [
+            "Given the user is on the login page",
+            "When the user enters valid credentials",
+            "And the user clicks the login button",
+            "Then the user should be redirected to the dashboard"
+        ]
+    },
+    {
+        "name": "Unsuccessful login with invalid credentials",
+        "steps": [
+            "Given the user is on the login page",
+            "When the user enters invalid credentials",
+            "And the user clicks the login button",
+            "Then an error message should be displayed"
+        ]
+    }
+]
+
+generate_feature_file("Login functionality", scenarios)
+```
+
+#### 3. Use GitHub Copilot for Step Definition Stubs
+
+In Visual Studio Code, use GitHub Copilot to generate step definition stubs. For example, you can write a partial step definition class and let Copilot suggest the completions.
+
+**Example: `LoginSteps.cs`**
+
+```csharp
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class LoginSteps
+{
+    [Given(@"the user is on the login page")]
+    public void GivenTheUserIsOnTheLoginPage()
+    {
+        // Copilot will suggest implementation here
+    }
+
+    [When(@"the user enters valid credentials")]
+    public void WhenTheUserEntersValidCredentials()
+    {
+        // Copilot will suggest implementation here
+    }
+
+    [When(@"the user clicks the login button")]
+    public void WhenTheUserClicksTheLoginButton()
+    {
+        // Copilot will suggest implementation here
+    }
+
+    [Then(@"the user should be redirected to the dashboard")]
+    public void ThenTheUserShouldBeRedirectedToTheDashboard()
+    {
+        // Copilot will suggest implementation here
+    }
+
+    [When(@"the user enters invalid credentials")]
+    public void WhenTheUserEntersInvalidCredentials()
+    {
+        // Copilot will suggest implementation here
+    }
+
+    [Then(@"an error message should be displayed")]
+    public void ThenAnErrorMessageShouldBeDisplayed()
+    {
+        // Copilot will suggest implementation here
+    }
+}
+```
+
+#### 4. Generate Step Definitions
+
+You can automate step definition generation using templates and scripts.
+
+**Example: `generate_step_definitions.py`**
+
+```python
+import os
+import re
+
+def camel_case(s):
+    return ''.join(x for x in s.title() if x.isalnum())
+
+def generate_step_definition(feature_file):
+    class_name = os.path.splitext(os.path.basename(feature_file))[0] + 'Steps'
+    with open(feature_file, 'r') as f:
+        content = f.read()
+    given_steps = re.findall(r'Given (.+)', content)
+    when_steps = re.findall(r'When (.+)', content)
+    then_steps = re.findall(r'Then (.+)', content)
+
+    step_definitions = f"""
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class {class_name}
+{{
+"""
+    for step in given_steps:
+        step_definitions += f"""
+    [Given(@"{step}")]
+    public void Given{camel_case(step)}()
+    {{
+        // TODO: Implement Given step
+    }}
+"""
+    for step in when_steps:
+        step_definitions += f"""
+    [When(@"{step}")]
+    public void When{camel_case(step)}()
+    {{
+        // TODO: Implement When step
+    }}
+"""
+    for step in then_steps:
+        step_definitions += f"""
+    [Then(@"{step}")]
+    public void Then{camel_case(step)}()
+    {{
+        // TODO: Implement Then step
+    }}
+"""
+    step_definitions += "\n}"
+
+    output_file = os.path.join('StepDefinitions', class_name + '.cs')
+    with open(output_file, 'w') as f:
+        f.write(step_definitions)
+
+if not os.path.exists('StepDefinitions'):
+    os.makedirs('StepDefinitions')
+
+for feature_file in os.listdir('Features'):
+    if feature_file.endswith('.feature'):
+        generate_step_definition(os.path.join('Features', feature_file))
+```
+
+#### 5. Integrate and Run Tests
+
+Integrate the generated tests into your CI/CD pipeline using a tool like GitHub Actions, Jenkins, or Azure DevOps.
+
+**Example: GitHub Actions Workflow (`.github/workflows/dotnet.yml`)**
+
+```yaml
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+```
+
+### Conclusion
+
+Automating test case generation with SpecFlow using GitHub Copilot involves combining Copilot's AI-assisted code suggestions with scripts to handle repetitive tasks. While Copilot excels in generating boilerplate code and providing suggestions, automation scripts can help streamline the process, making it more efficient. This approach leverages the strengths of both tools to enhance productivity in test automation.
+
+
+
+
+
+
+As of now, GitHub Copilot is primarily designed to assist developers interactively within supported IDEs like Visual Studio Code. It isn't designed to be invoked programmatically via an API or other means for fully automated use cases. GitHub Copilot works by analyzing the context of the code you are writing in real-time and providing suggestions, which inherently requires an interactive development environment.
+
+However, there are still ways to leverage Copilot's capabilities effectively within an automated or semi-automated workflow:
+
+### Workflow Leveraging Copilot's Capabilities
+
+1. **Interactive Usage for Initial Setup**:
+    - Use GitHub Copilot interactively to generate templates, common functions, and boilerplate code. This initial setup can be reused in your automated scripts.
+
+2. **Create Reusable Templates**:
+    - Save the code generated by Copilot as reusable templates. These templates can then be programmatically populated with specific details based on your test cases.
+
+3. **Automation Script for Feature Files and Step Definitions**:
+    - Write automation scripts to generate SpecFlow feature files and use the saved templates for step definitions.
+
+### Example: Combining Copilot with Automation Scripts
+
+1. **Interactive Step (Using Copilot)**:
+    - Use Copilot to generate a base template for step definitions.
+
+```csharp
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class {ClassName}
+{
+    [Given(@"{GivenStep}")]
+    public void Given{GivenMethod}()
+    {
+        // TODO: Implement Given step
+    }
+
+    [When(@"{WhenStep}")]
+    public void When{WhenMethod}()
+    {
+        // TODO: Implement When step
+    }
+
+    [Then(@"{ThenStep}")]
+    public void Then{ThenMethod}()
+    {
+        // TODO: Implement Then step
+    }
+}
+```
+
+2. **Automation Script**:
+    - Use a Python script to automate the creation of feature files and populate the template generated by Copilot.
+
+**Example: `generate_step_definitions.py`**
+
+```python
+import os
+import re
+
+template = """
+using TechTalk.SpecFlow;
+using NUnit.Framework;
+
+[Binding]
+public class {ClassName}
+{{
+    [Given(@"{GivenStep}")]
+    public void Given{GivenMethod}()
+    {{
+        // TODO: Implement Given step
+    }}
+
+    [When(@"{WhenStep}")]
+    public void When{WhenMethod}()
+    {{
+        // TODO: Implement When step
+    }}
+
+    [Then(@"{ThenStep}")]
+    public void Then{ThenMethod}()
+    {{
+        // TODO: Implement Then step
+    }}
+}}
+"""
+
+def camel_case(s):
+    return ''.join(x for x in s.title() if x.isalnum())
+
+def generate_step_definition(feature_file):
+    class_name = os.path.splitext(os.path.basename(feature_file))[0] + 'Steps'
+    with open(feature_file, 'r') as f:
+        content = f.read()
+    given_steps = re.findall(r'Given (.+)', content)
+    when_steps = re.findall(r'When (.+)', content)
+    then_steps = re.findall(r'Then (.+)', content)
+
+    step_definitions = template.format(
+        ClassName=class_name,
+        GivenStep=given_steps[0] if given_steps else '',
+        WhenStep=when_steps[0] if when_steps else '',
+        ThenStep=then_steps[0] if then_steps else '',
+        GivenMethod=camel_case(given_steps[0]) if given_steps else '',
+        WhenMethod=camel_case(when_steps[0]) if when_steps else '',
+        ThenMethod=camel_case(then_steps[0]) if then_steps else ''
+    )
+
+    output_file = os.path.join('StepDefinitions', class_name + '.cs')
+    with open(output_file, 'w') as f:
+        f.write(step_definitions)
+
+if not os.path.exists('StepDefinitions'):
+    os.makedirs('StepDefinitions')
+
+for feature_file in os.listdir('Features'):
+    if feature_file.endswith('.feature'):
+        generate_step_definition(os.path.join('Features', feature_file))
+```
+
+### Conclusion
+
+While GitHub Copilot itself cannot be invoked programmatically, its capabilities can still be leveraged to enhance and streamline your workflow. By using Copilot interactively to generate reusable templates and then employing automation scripts to handle the repetitive parts of your test case generation, you can achieve a high level of efficiency in your development process. This hybrid approach allows you to benefit from Copilot's powerful code suggestions while automating as much of the process as possible.
+
